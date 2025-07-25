@@ -1,16 +1,9 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 
-interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  children: React.ReactNode;
-}
-
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+const Modal = ({ isOpen, onClose, title, children }) => {
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
+    const handleEscape = (e) => {
       if (e.key === 'Escape') {
         onClose();
       }

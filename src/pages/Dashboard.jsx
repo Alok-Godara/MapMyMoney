@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import Modal from '../components/Modal';
-import { Company } from '../types';
 import { getUserCompanies, createCompany, joinCompany } from '../utils/mockData';
 import { Plus, Building2, Users, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const Dashboard: React.FC = () => {
-  const [companies, setCompanies] = useState<Company[]>([]);
+const Dashboard = () => {
+  const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
@@ -36,7 +34,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleCreateCompany = async (e: React.FormEvent) => {
+  const handleCreateCompany = async (e) => {
     e.preventDefault();
     if (!user || !newCompanyName.trim()) return;
 
@@ -51,7 +49,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleJoinCompany = async (e: React.FormEvent) => {
+  const handleJoinCompany = async (e) => {
     e.preventDefault();
     if (!user || !joinCompanyId.trim()) return;
 
@@ -66,8 +64,8 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+  const formatCurrency = (amount) => {
+    return new ('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(amount);
