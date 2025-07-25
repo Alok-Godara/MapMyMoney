@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Building2 } from "lucide-react";
-import authService from "../supabase/auth";
-import userSlice from "../store/userSlice";
-import { useDispatch } from "react-redux";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -16,20 +13,6 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const { user, error } = await authService.login({ email, password });
-      if (error) throw error;
-      dispatch(userSlice.actions.setUser(user));
-      navigate("/dashboard");
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (

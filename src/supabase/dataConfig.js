@@ -103,6 +103,96 @@ export class CompanyService {
     if (error) throw error;
     return data;
   }
+
+  // 12. Get company by ID with details
+  async getCompanyById(companyId) {
+    const { data, error } = await supabase
+      .from("companies")
+      .select(`
+        *,
+        company_members(user_id),
+        expenses(*),
+        funds(*)
+      `)
+      .eq("id", companyId)
+      .single();
+    
+    if (error) throw error;
+    
+    // Calculate totals
+    const totalFunds = data.funds?.reduce((sum, fund) => sum + fund.amount, 0) || 0;
+    const totalExpenses = data.expenses?.reduce((sum, expense) => sum + expense.amount, 0) || 0;
+    const totalReimbursed = data.expenses?.reduce((sum, expense) => 
+      sum + (expense.reimbursed_amount || 0), 0) || 0;
+    const totalPendingReimbursements = data.expenses?.reduce((sum, expense) => 
+      expense.status === 'pending' ? sum + expense.amount : sum, 0) || 0;
+    
+    return {
+      ...data,
+      members: data.company_members?.map(m => m.user_id) || [],
+      totalFunds,
+      totalExpenses,
+      totalReimbursed,
+      totalPendingReimbursements
+    };
+  }
+
+  // 13. Get company expenses
+  async getCompanyExpenses(companyId) {
+    const { data, error } = await supabase
+      .from("expenses")
+      .select(`
+        *,
+        profiles:paid_by(name)
+      `)
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: false });
+    
+    if (error) throw error;
+    
+    return (data || []).map(expense => ({
+      ...expense,
+      paidByName: expense.profiles?.name || 'Unknown User',
+      date: new Date(expense.created_at)
+    }));
+  }
+
+  // 14. Get company funds
+  async getCompanyFunds(companyId) {
+    const { data, error } = await supabase
+      .from("funds")
+      .select(`
+        *,
+        profiles:added_by(name)
+      `)
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: false });
+    
+    if (error) throw error;
+    
+    return (data || []).map(fund => ({
+      ...fund,
+      addedByName: fund.profiles?.name || 'Unknown User',
+      createdAt: new Date(fund.created_at)
+    }));
+  }
+
+  // 15. Reimburse expense
+  async reimburseExpense(companyId, expenseId, amount, reimburserUserId) {
+    const { data, error } = await supabase
+      .from("expenses")
+      .update({ 
+        status: 'reimbursed',
+        reimbursed_amount: amount,
+        reimbursed_by: reimburserUserId,
+        reimbursed_at: new Date().toISOString()
+      })
+      .eq("id", expenseId)
+      .eq("company_id", companyId);
+    
+    if (error) throw error;
+    return data;
+  }
 }
 
 const companyService = new CompanyService();
