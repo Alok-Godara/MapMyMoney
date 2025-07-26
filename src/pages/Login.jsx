@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import authService from "../supabase/auth";
+import { login } from "../store/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { Building2 } from "lucide-react";
 
@@ -13,6 +16,24 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
+    const { data, error } = await authService.loginService({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.error("Error signing in :: ", error);
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+
+    dispatch(login({ data, isLoggedIn: true }));
+
+    setLoading(false);
+    navigate("/Dashboard");
   };
 
   return (
@@ -23,7 +44,7 @@ const Login = () => {
             <Building2 className="h-8 w-8 text-white" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-            Sign in to ExpenseTracker
+            Sign in to MapMyMoney
           </h2>
           <p className="mt-2 text-center text-sm text-gray-400">
             Or{" "}

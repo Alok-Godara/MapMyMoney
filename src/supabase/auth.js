@@ -2,40 +2,46 @@ import { supabase } from "./supabaseClient";
 
 export class AuthService {
 
-  async createAccount({ email, password, name }) {
+  async createAccountService({ email, password, name }) {
     try {
-      const { user, error } = await supabase.auth.signUp({ email, password, data: { name } });
-      if (error) throw error;
-      return user;
+      const { data, error } = await supabase.auth.signUp({ 
+        email, 
+        password, 
+        options: { 
+          data: { name } 
+        }
+      });
+      if (error) return { user: null, error };
+      return { user: data.user, error: null };
     } catch (error) {
       console.log("Supabase service :: createAccount :: error", error);
+      return { user: null, error };
     }
-    
   }
 
-  async login({ email, password }) {
+  async loginService({ email, password }) {
     try {
-      const { user, error } = await supabase.auth.signIn({ email, password });
-      if (error) throw error;
-      return user;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return { user: null, error };
+      return { user: data.user, error: null };
     } catch (error) {
       console.error("Supabase service :: login :: error", error);
+      return { user: null, error };
     }
   }
 
-  async getCurrentUser() {
+  async getCurrentUserService() {
     try {
-      const { user, error } = await supabase.auth.getUser();
-      if (error) throw error;
-      return user;
+      const { data, error } = await supabase.auth.getUser();
+      if (error) return { user: null, error };
+      return { user: data.user, error: null };
     } catch (error) {
       console.error("Supabase service :: getCurrentUser :: error", error);
+      return { user: null, error };
     }
-
-    return null;
   }
 
-  async logout() {
+  async logoutService() {
     try {
       await supabase.auth.signOut();
       return true;

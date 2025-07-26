@@ -1,20 +1,42 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Building2 } from "lucide-react";
+import { login } from "../store/authSlice";
+import { useNavigate, Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import authService from "../supabase/auth";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [error, setError] = useState("");
 
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-  };
+    setLoading(true);
 
+    const { data, error } = await authService.createAccountService({
+      email,
+      password,
+      name,
+    });
+
+    if (error) {
+      console.error("Error signing up :: ", error);
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+
+    dispatch(login({ data, isLoggedIn: true }));
+
+    setLoading(false);
+    navigate("/Dashboard");
+  };
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">

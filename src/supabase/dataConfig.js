@@ -3,11 +3,11 @@ import { supabase } from "./supabaseClient";
 
 export class CompanyService {
   // 1. Create a new company
-  async createCompany({ name, description, ownerId }) {
+  async createCompany({ name, ownerId }) {
     const { data, error } = await supabase
       .from("companies")
-      .insert([{ name, description, owner_id: ownerId }]);
-    if (error) throw error;
+      .insert([{ name, owner_id: ownerId, totalFunds: 0, totalExpenses: 0 }]);
+    if (error) throw "Error creating company :: " + error;
     return data;
   }
 
@@ -33,10 +33,13 @@ export class CompanyService {
 
   // 4. Join a company
   async joinCompany({ userId, companyId }) {
+
     const { data, error } = await supabase
-      .from("company_members")
+      .from("company_users")
       .insert([{ user_id: userId, company_id: companyId }]);
-    if (error) throw error;
+
+    if (error) throw 'Error updating Company_Users :: ' + error;
+
     return data;
   }
 
@@ -108,32 +111,43 @@ export class CompanyService {
   async getCompanyById(companyId) {
     const { data, error } = await supabase
       .from("companies")
-      .select(`
+      .select(
+        `
         *,
         company_members(user_id),
         expenses(*),
         funds(*)
-      `)
+      `
+      )
       .eq("id", companyId)
       .single();
-    
+
     if (error) throw error;
-    
+
     // Calculate totals
-    const totalFunds = data.funds?.reduce((sum, fund) => sum + fund.amount, 0) || 0;
-    const totalExpenses = data.expenses?.reduce((sum, expense) => sum + expense.amount, 0) || 0;
-    const totalReimbursed = data.expenses?.reduce((sum, expense) => 
-      sum + (expense.reimbursed_amount || 0), 0) || 0;
-    const totalPendingReimbursements = data.expenses?.reduce((sum, expense) => 
-      expense.status === 'pending' ? sum + expense.amount : sum, 0) || 0;
-    
+    const totalFunds =
+      data.funds?.reduce((sum, fund) => sum + fund.amount, 0) || 0;
+    const totalExpenses =
+      data.expenses?.reduce((sum, expense) => sum + expense.amount, 0) || 0;
+    const totalReimbursed =
+      data.expenses?.reduce(
+        (sum, expense) => sum + (expense.reimbursed_amount || 0),
+        0
+      ) || 0;
+    const totalPendingReimbursements =
+      data.expenses?.reduce(
+        (sum, expense) =>
+          expense.status === "pending" ? sum + expense.amount : sum,
+        0
+      ) || 0;
+
     return {
       ...data,
-      members: data.company_members?.map(m => m.user_id) || [],
+      members: data.company_members?.map((m) => m.user_id) || [],
       totalFunds,
       totalExpenses,
       totalReimbursed,
-      totalPendingReimbursements
+      totalPendingReimbursements,
     };
   }
 
@@ -141,19 +155,21 @@ export class CompanyService {
   async getCompanyExpenses(companyId) {
     const { data, error } = await supabase
       .from("expenses")
-      .select(`
+      .select(
+        `
         *,
         profiles:paid_by(name)
-      `)
+      `
+      )
       .eq("company_id", companyId)
       .order("created_at", { ascending: false });
-    
+
     if (error) throw error;
-    
-    return (data || []).map(expense => ({
+
+    return (data || []).map((expense) => ({
       ...expense,
-      paidByName: expense.profiles?.name || 'Unknown User',
-      date: new Date(expense.created_at)
+      paidByName: expense.profiles?.name || "Unknown User",
+      date: new Date(expense.created_at),
     }));
   }
 
@@ -161,19 +177,21 @@ export class CompanyService {
   async getCompanyFunds(companyId) {
     const { data, error } = await supabase
       .from("funds")
-      .select(`
+      .select(
+        `
         *,
         profiles:added_by(name)
-      `)
+      `
+      )
       .eq("company_id", companyId)
       .order("created_at", { ascending: false });
-    
+
     if (error) throw error;
-    
-    return (data || []).map(fund => ({
+
+    return (data || []).map((fund) => ({
       ...fund,
-      addedByName: fund.profiles?.name || 'Unknown User',
-      createdAt: new Date(fund.created_at)
+      addedByName: fund.profiles?.name || "Unknown User",
+      createdAt: new Date(fund.created_at),
     }));
   }
 
@@ -181,17 +199,38 @@ export class CompanyService {
   async reimburseExpense(companyId, expenseId, amount, reimburserUserId) {
     const { data, error } = await supabase
       .from("expenses")
-      .update({ 
-        status: 'reimbursed',
+      .update({
+        status: "reimbursed",
         reimbursed_amount: amount,
         reimbursed_by: reimburserUserId,
-        reimbursed_at: new Date().toISOString()
+        reimbursed_at: new Date().toISOString(),
       })
       .eq("id", expenseId)
       .eq("company_id", companyId);
-    
+
     if (error) throw error;
     return data;
+  }
+
+  async getUserCompanies(userId) {
+    const { data, error } = await supabase
+      .from("company_users")
+      .select("company_id")
+      .eq("user_id", userId);
+
+    if (error) throw "Error fetching user companies from company_users:: " + error;
+
+    const companyIds = data.map((member) => member.company_id);
+    if (companyIds.length === 0) return [];
+
+    const { data: companies, error: companiesError } = await supabase
+      .from("companies")
+      .select("*")
+      .in("id", companyIds);
+
+    if (companiesError) throw "Error fetching companies from companies :: " +companiesError;
+
+    return companies;
   }
 }
 
