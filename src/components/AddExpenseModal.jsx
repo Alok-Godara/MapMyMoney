@@ -1,29 +1,32 @@
-import React, { useState } from 'react';
-import Modal from './Modal';
-import { Upload, X } from 'lucide-react';
+import React, { useState } from "react";
+import Modal from "./Modal";
+import { Upload, X } from "lucide-react";
+import { useSelector } from "react-redux";
 
+const expenseTypes = [
+  "Food",
+  "Travel",
+  "Office Supplies",
+  "Entertainment",
+  "Equipment",
+  "Other",
+];
 
-const expenseTypes = ['Food', 'Travel', 'Office Supplies', 'Entertainment', 'Equipment', 'Other'];
-
-const AddExpenseModal = ({
-  isOpen,
-  onClose,
-  companyId,
-  onExpenseAdded,
-}) => {
+const AddExpenseModal = ({ isOpen, onClose, companyId, onExpenseAdded }) => {
   const [formData, setFormData] = useState({
-    title: '',
-    amount: '',
-    type: 'Food',
-    description: '',
-    date: new Date().toISOString().split('T')[0],
+    title: "",
+    amount: "",
+    type: "Food",
+    description: "",
+    date: new Date().toISOString().split("T")[0],
+    user_id : useSelector((state) => state.auth.user.id),
   });
   const [receiptFile, setReceiptFile] = useState(null);
-  const [receiptPreview, setReceiptPreview] = useState('');
+  const [receiptPreview, setReceiptPreview] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  const { user } = useAuth();
+  const { user } = useSelector((state) => state.auth);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -38,7 +41,7 @@ const AddExpenseModal = ({
       setReceiptFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        setReceiptPreview(e.target?.result || '');
+        setReceiptPreview(e.target?.result || "");
       };
       reader.readAsDataURL(file);
     }
@@ -46,7 +49,7 @@ const AddExpenseModal = ({
 
   const removeReceipt = () => {
     setReceiptFile(null);
-    setReceiptPreview('');
+    setReceiptPreview("");
   };
 
   const handleSubmit = async (e) => {
@@ -54,12 +57,12 @@ const AddExpenseModal = ({
     if (!user) return;
 
     if (!formData.title || !formData.amount) {
-      setError('Please fill in all required fields');
+      setError("Please fill in all required fields");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       addExpense(companyId, {
@@ -67,28 +70,27 @@ const AddExpenseModal = ({
         amount: parseFloat(formData.amount),
         type: formData.type,
         description: formData.description,
-        date: new Date(formData.date),
-        paidBy: user.id,
-        paidByName: user.name,
-        receiptURL: receiptPreview || undefined,
-        status: 'pending',
+        created_at: new Date(formData.date),
+        user_id: formData.user_id,
+        image_url: receiptPreview || undefined,
+        status: "pending",
       });
 
       // Reset form
       setFormData({
-        title: '',
-        amount: '',
-        type: 'Food',
-        description: '',
-        date: new Date().toISOString().split('T')[0],
+        title: "",
+        amount: "",
+        type: "Food",
+        description: "",
+        date: new Date().toISOString().split("T")[0],
       });
       setReceiptFile(null);
-      setReceiptPreview('');
-      
+      setReceiptPreview("");
+
       onExpenseAdded();
       onClose();
     } catch (error) {
-      setError('Failed to add expense. Please try again.');
+      setError("Failed to add expense. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -104,7 +106,10 @@ const AddExpenseModal = ({
         )}
 
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-300">
+          <label
+            htmlFor="title"
+            className="block text-sm font-medium text-gray-300"
+          >
             Title *
           </label>
           <input
@@ -121,7 +126,10 @@ const AddExpenseModal = ({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="amount" className="block text-sm font-medium text-gray-300">
+            <label
+              htmlFor="amount"
+              className="block text-sm font-medium text-gray-300"
+            >
               Amount *
             </label>
             <input
@@ -139,7 +147,10 @@ const AddExpenseModal = ({
           </div>
 
           <div>
-            <label htmlFor="type" className="block text-sm font-medium text-gray-300">
+            <label
+              htmlFor="type"
+              className="block text-sm font-medium text-gray-300"
+            >
               Type
             </label>
             <select
@@ -159,7 +170,10 @@ const AddExpenseModal = ({
         </div>
 
         <div>
-          <label htmlFor="date" className="block text-sm font-medium text-gray-300">
+          <label
+            htmlFor="date"
+            className="block text-sm font-medium text-gray-300"
+          >
             Date
           </label>
           <input
@@ -173,7 +187,10 @@ const AddExpenseModal = ({
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-300">
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-gray-300"
+          >
             Description
           </label>
           <textarea
@@ -191,7 +208,7 @@ const AddExpenseModal = ({
           <label className="block text-sm font-medium text-gray-300 mb-2">
             Receipt (Optional)
           </label>
-          
+
           {receiptPreview ? (
             <div className="relative">
               <img
@@ -213,7 +230,9 @@ const AddExpenseModal = ({
                 <Upload className="mx-auto h-8 w-8 text-gray-400" />
                 <div className="mt-2">
                   <label htmlFor="receipt" className="cursor-pointer">
-                    <span className="text-blue-500 hover:text-blue-400">Upload a receipt</span>
+                    <span className="text-blue-500 hover:text-blue-400">
+                      Upload a receipt
+                    </span>
                     <input
                       id="receipt"
                       name="receipt"
@@ -224,7 +243,9 @@ const AddExpenseModal = ({
                     />
                   </label>
                 </div>
-                <p className="text-xs text-gray-400">PNG, JPG, GIF up to 10MB</p>
+                <p className="text-xs text-gray-400">
+                  PNG, JPG, GIF up to 10MB
+                </p>
               </div>
             </div>
           )}
@@ -243,7 +264,7 @@ const AddExpenseModal = ({
             disabled={loading}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Adding...' : 'Add Expense'}
+            {loading ? "Adding..." : "Add Expense"}
           </button>
         </div>
       </form>

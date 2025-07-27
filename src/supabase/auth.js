@@ -12,6 +12,7 @@ export class AuthService {
         }
       });
       if (error) return { user: null, error };
+      await supabase.from('users').insert([{ id: data.user.id, name, email: data.user.email }]);
       return { user: data.user, error: null };
     } catch (error) {
       console.log("Supabase service :: createAccount :: error", error);

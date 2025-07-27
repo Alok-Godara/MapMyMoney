@@ -1,24 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import AuthLayout from '../components/AuthLayout';
-import Modal from '../components/Modal';
-import { Plus, Building2, Users, TrendingUp } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import {getUserCompanies, createCompany, joinCompany} from '../supabase/dataConfig';
+import { useState, useEffect } from "react";
+import AuthLayout from "../components/AuthLayout";
+import Modal from "../components/Modal";
+import { Plus, Building2, Users, TrendingUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import companyService from "../supabase/dataConfig";
+import { useSelector } from "react-redux";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
-  
+
   const [companies, setCompanies] = useState([]);
-  
-  const [newCompanyName, setNewCompanyName] = useState('');
-  const [joinCompanyId, setJoinCompanyId] = useState('');
-  
-  const [error, setError] = useState('');
-  
-  const { user } = useAuth();
+
+  const [newCompanyName, setNewCompanyName] = useState("");
+  const [joinCompanyId, setJoinCompanyId] = useState("");
+
+  const [error, setError] = useState("");
+
+  const user = useSelector((state) => state.auth.user);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,12 +29,15 @@ const Dashboard = () => {
 
   const loadCompanies = async () => {
     if (!user) return;
-    
+
     try {
-      const userCompanies = getUserCompanies(user.id);
+      const userCompanies = await companyService.getUserCompanies(user.id);
       setCompanies(userCompanies);
     } catch (error) {
-      console.error('Error loading companies :: Function getUserComapnies :: ', error);
+      console.error(
+        "Error loading companies :: Function getUserComapnies :: ",
+        error
+      );
     } finally {
       setLoading(false);
     }
@@ -43,13 +48,13 @@ const Dashboard = () => {
     if (!user || !newCompanyName.trim()) return;
 
     try {
-      setError('');
-      createCompany(newCompanyName.trim(), user.id, );
-      setNewCompanyName('');
+      setError("");
+      await companyService.createCompany({ name: newCompanyName.trim(), ownerId: user.id });
+      setNewCompanyName("");
       setShowCreateModal(false);
       loadCompanies();
     } catch (error) {
-      setError('Failed to create company :: ' + error.message);
+      setError("Failed to create company :: " + error.message);
     }
   };
 
@@ -58,24 +63,23 @@ const Dashboard = () => {
     if (!user || !joinCompanyId.trim()) return;
 
     try {
-      setError('');
-      joinCompany(user.id, joinCompanyId.trim() );
-      setJoinCompanyId('');
+      setError("");
+      await companyService.joinCompany({ userId: user.id, companyId: joinCompanyId.trim() });
+      setJoinCompanyId("");
       setShowJoinModal(false);
       loadCompanies();
-
     } catch (error) {
-      console.error('Error joining company :: ', error);
-      setError('Failed to join company. Please check the company ID.');
+      console.error("Error joining company :: ", error);
+      setError("Failed to join company. Please check the company ID.");
     }
   };
 
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-  }).format(amount);
-};
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+    }).format(amount);
+  };
 
   if (loading) {
     return (
@@ -92,8 +96,12 @@ const formatCurrency = (amount) => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-white">Welcome back, {user?.name}</h2>
-            <p className="mt-1 text-gray-400">Manage your companies and expenses</p>
+            <h2 className="text-2xl font-bold text-white">
+              Welcome back, {user?.user_metadata?.name || user?.email}
+            </h2>
+            <p className="mt-1 text-gray-400">
+              Manage your companies and expenses
+            </p>
           </div>
           <div className="mt-4 sm:mt-0 flex space-x-3">
             <button
@@ -116,7 +124,9 @@ const formatCurrency = (amount) => {
         {companies.length === 0 ? (
           <div className="text-center py-12">
             <Building2 className="mx-auto h-12 w-12 text-gray-600" />
-            <h3 className="mt-2 text-sm font-medium text-white">No companies</h3>
+            <h3 className="mt-2 text-sm font-medium text-white">
+              No companies
+            </h3>
             <p className="mt-1 text-sm text-gray-400">
               Get started by creating a new company or joining an existing one.
             </p>
@@ -139,19 +149,24 @@ const formatCurrency = (amount) => {
                         {company.name}
                       </h3>
                       <p className="text-sm text-gray-400">
-                        {company.members_length} member{company.members_length !== 1 ? 's' : ''}
+                        {company.members_length} member
+                        {company.members_length !== 1 ? "s" : ""}
                       </p>
                     </div>
                   </div>
                   <div className="mt-4 grid grid-cols-2 gap-4">
                     <div>
-                      <dt className="text-sm font-medium text-gray-400">Available Funds</dt>
+                      <dt className="text-sm font-medium text-gray-400">
+                        Available Funds
+                      </dt>
                       <dd className="text-sm font-semibold text-green-400">
                         {formatCurrency(company.totalFunds)}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-400">Total Expenses</dt>
+                      <dt className="text-sm font-medium text-gray-400">
+                        Total Expenses
+                      </dt>
                       <dd className="text-sm font-semibold text-red-400">
                         {formatCurrency(company.totalExpenses)}
                       </dd>
@@ -183,7 +198,10 @@ const formatCurrency = (amount) => {
             </div>
           )}
           <div>
-            <label htmlFor="companyName" className="block text-sm font-medium text-gray-300">
+            <label
+              htmlFor="companyName"
+              className="block text-sm font-medium text-gray-300"
+            >
               Company Name
             </label>
             <input
@@ -227,7 +245,10 @@ const formatCurrency = (amount) => {
             </div>
           )}
           <div>
-            <label htmlFor="companyId" className="block text-sm font-medium text-gray-300">
+            <label
+              htmlFor="companyId"
+              className="block text-sm font-medium text-gray-300"
+            >
               Company ID
             </label>
             <input

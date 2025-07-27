@@ -19,7 +19,7 @@ const Signup = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { data, error } = await authService.createAccountService({
+    const { user, error } = await authService.createAccountService({
       email,
       password,
       name,
@@ -32,7 +32,7 @@ const Signup = () => {
       return;
     }
 
-    dispatch(login({ data, isLoggedIn: true }));
+    dispatch(login({ user }));
 
     setLoading(false);
     navigate("/Dashboard");

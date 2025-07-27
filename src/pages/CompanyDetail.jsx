@@ -1,16 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import AuthLayout from "../components/AuthLayout";
-import companyService from "../supabase/dataConfig";
-import AddExpenseModal from "../components/AddExpenseModal";
-import AddFundsModal from "../components/AddFundsModal";
-
 import {
   ArrowLeft,
   DollarSign,
   Receipt,
-  Users,  
+  Users,
   TrendingUp,
   Filter,
   Calendar,
@@ -20,22 +12,36 @@ import {
   AlertCircle,
 } from "lucide-react";
 
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+
+import companyService from "../supabase/dataConfig";
+import AuthLayout from "../components/AuthLayout";
+import AddExpenseModal from "../components/AddExpenseModal";
+import AddFundsModal from "../components/AddFundsModal";
+
 const CompanyDetail = () => {
   const { companyId } = useParams();
+
   const user = useSelector((state) => state.user);
+
   const navigate = useNavigate();
 
   const [company, setCompany] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [funds, setFunds] = useState([]);
+
   const [loading, setLoading] = useState(true);
+
   const [activeTab, setActiveTab] = useState("overview");
+
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showAddFunds, setShowAddFunds] = useState(false);
+
   const [statusFilter, setStatusFilter] = useState("all");
 
   const isOwner = user && company && user.id === company.owner_id;
-
 
   useEffect(() => {
     if (companyId && user.isLoggedIn) {
@@ -49,6 +55,7 @@ const CompanyDetail = () => {
     try {
       setLoading(true);
       const companyData = await companyService.getCompanyById(companyId);
+
       if (!companyData) {
         navigate("/dashboard");
         return;
@@ -61,6 +68,7 @@ const CompanyDetail = () => {
 
       setExpenses(expenseData);
       setFunds(fundData);
+      
     } catch (error) {
       console.error("Error loading company data:", error);
       // Optionally navigate to dashboard if company not found
@@ -77,9 +85,9 @@ const CompanyDetail = () => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: "USD",
+      currency: "INR",
     }).format(amount);
   };
 
@@ -242,7 +250,9 @@ const CompanyDetail = () => {
                 </div>
               </div>
 
-              <div className="bg-gray-800 rounded-lg p-6">
+
+              {/** Pending Reimbursements */}
+              {/* <div className="bg-gray-800 rounded-lg p-6">
                 <div className="flex items-center">
                   <Clock className="h-8 w-8 text-amber-500" />
                   <div className="ml-4">
@@ -252,9 +262,11 @@ const CompanyDetail = () => {
                     </p>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
-              <div className="bg-gray-800 rounded-lg p-6">
+
+              {/** Reimbursed Amount */}
+              {/* <div className="bg-gray-800 rounded-lg p-6">
                 <div className="flex items-center">
                   <CheckCircle className="h-8 w-8 text-green-500" />
                   <div className="ml-4">
@@ -266,7 +278,8 @@ const CompanyDetail = () => {
                     </p>
                   </div>
                 </div>
-              </div>
+              </div> */}
+
             </div>
 
             {/* Recent Expenses */}
@@ -363,7 +376,7 @@ const CompanyDetail = () => {
                         {expense.receipt_url && (
                           <div className="mt-3">
                             <img
-                              src={expense.receipt_url}
+                              src={expense.image_url}
                               alt="Receipt"
                               className="h-20 w-20 object-cover rounded-md border border-gray-600"
                             />
@@ -381,12 +394,12 @@ const CompanyDetail = () => {
                         >
                           {expense.status}
                         </p>
-                        {expense.reimbursed_amount && (
+                        {/* {expense.reimbursed_amount && (
                           <p className="text-sm text-gray-400">
                             Reimbursed:{" "}
                             {formatCurrency(expense.reimbursed_amount)}
                           </p>
-                        )}
+                        )} */}
                         {isOwner && expense.status === "pending" && (
                           <button
                             onClick={() =>
@@ -440,14 +453,15 @@ const CompanyDetail = () => {
           </div>
         )}
 
-        {activeTab === "members" && (
+        {/* Activate to members of a company.*/}
+        {/* {activeTab === "members" && (
           <div className="bg-gray-800 rounded-lg p-6">
             <h3 className="text-lg font-medium text-white mb-4">
               Members ({company.members?.length || 0})
             </h3>
             <div className="space-y-3">
-              {company.members?.length > 0 ? (
-                company.members.map((memberId) => (
+              {company.members_length > 0 ? (
+                companyUsers.user_id.map((memberId) => (
                   <div key={memberId} className="flex items-center space-x-3">
                     <Users className="h-5 w-5 text-gray-400" />
                     <span className="text-white">Member ID: {memberId}</span>
@@ -463,7 +477,7 @@ const CompanyDetail = () => {
               )}
             </div>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Modals */}

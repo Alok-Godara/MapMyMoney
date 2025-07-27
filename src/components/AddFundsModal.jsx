@@ -1,18 +1,43 @@
 import React, { useState } from "react";
 import Modal from "./Modal";
+import companyService from "../supabase/dataConfig";
+import { useSelector } from "react-redux";
+
 
 const AddFundsModal = ({ isOpen, onClose, companyId, onFundsAdded }) => {
+
   const [formData, setFormData] = useState({
     amount: "",
     note: "",
+    user_id: useSelector((state) => state.data.id),
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleInputChange = (e) => {};
+  const handleInputChange = (e) => {
+        setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
-  const handleSubmit = async (e) => {};
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      await companyService.addFund(companyId, formData);
+      onFundsAdded();
+      onClose();
+    } catch (error) {
+      console.error("Error adding funds:", error);
+      setError("Failed to add funds. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Add Funds">

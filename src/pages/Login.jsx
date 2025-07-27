@@ -18,7 +18,7 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { data, error } = await authService.loginService({
+    const { user, error } = await authService.loginService({
       email,
       password,
     });
@@ -30,7 +30,7 @@ const Login = () => {
       return;
     }
 
-    dispatch(login({ data, isLoggedIn: true }));
+    dispatch(login({ user }));
 
     setLoading(false);
     navigate("/Dashboard");

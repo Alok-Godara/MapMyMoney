@@ -5,36 +5,53 @@ import authService from "./supabase/auth";
 import { Outlet } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { login, logout } from "./store/authSlice";
-function App() {
 
+function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check user authentication status
     const checkAuth = async () => {
-      const {data, error} = await authService.getCurrentUserService();
-      if (data) {
-        dispatch(login({ data, isLoggedIn: true }));
-      } else {
+      try {
+        const { user, error } = await authService.getCurrentUserService();
+        console.log("Current user data :: ", user);
+        
+        if (error) {
+          console.error("Error fetching current user :: ", error);
+          dispatch(logout());
+          navigate("/login");
+          return;
+        }
+        
+        if (user) {
+          dispatch(login({ user }));
+          // Don't navigate here, let the user stay on current page
+        } else {
+          dispatch(logout());
+          navigate("/login");
+        }
+      } catch (error) {
+        console.error("Auth check failed :: ", error);
         dispatch(logout());
         navigate("/login");
+      } finally {
+        setLoading(false);
       }
     };
 
     checkAuth();
-    setLoading(false);
-  }, []);
-
+  }, [dispatch, navigate]);
 
   return loading ? (
-    <div>Loading...</div>
+    <div className="flex justify-center items-center h-screen bg-gray-900">
+      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
+    </div>
   ) : (
-      <main>
-        <Outlet />
-      </main>
+    <main>
+      <Outlet />
+    </main>
   );
 }
 

@@ -8,7 +8,6 @@ import Signup from './pages/Signup.jsx';
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import CompanyDetail from './pages/CompanyDetail.jsx';
-import AuthLayout from './components/AuthLayout.jsx';
 import React from 'react';
 
 const router = createBrowserRouter([
@@ -17,11 +16,9 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
         {
-            path: "/",
+            path: "/Dashboard",
             element: (
-                <AuthLayout authentication>
                     <Dashboard />
-                </AuthLayout>
             ),
         },
         {
@@ -39,9 +36,7 @@ const router = createBrowserRouter([
         {
             path: "/CompanyDetail/:companyId",
             element: (
-                <AuthLayout authentication>
                     <CompanyDetail />
-                </AuthLayout>
             ),
         },
     ],

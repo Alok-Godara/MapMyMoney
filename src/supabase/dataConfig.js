@@ -11,91 +11,111 @@ export class CompanyService {
     return data;
   }
 
-  // 2. Update company details
-  async updateCompany(companyId, updates) {
-    const { data, error } = await supabase
-      .from("companies")
-      .update(updates)
-      .eq("id", companyId);
-    if (error) throw error;
-    return data;
-  }
+  // // 2. Update company details
+  // async updateCompany(companyId, updates) {
+  //   const { data, error } = await supabase
+  //     .from("companies")
+  //     .update(updates)
+  //     .eq("id", companyId);
+  //   if (error) throw error;
+  //   return data;
+  // }
 
-  // 3. Delete a company
-  async deleteCompany(companyId) {
-    const { error } = await supabase
-      .from("companies")
-      .delete()
-      .eq("id", companyId);
-    if (error) throw error;
-    return true;
-  }
+  // // 3. Delete a company
+  // async deleteCompany(companyId) {
+  //   const { error } = await supabase
+  //     .from("companies")
+  //     .delete()
+  //     .eq("id", companyId);
+  //   if (error) throw error;
+  //   return true;
+  // }
 
   // 4. Join a company
   async joinCompany({ userId, companyId }) {
-
     const { data, error } = await supabase
       .from("company_users")
       .insert([{ user_id: userId, company_id: companyId }]);
 
-    if (error) throw 'Error updating Company_Users :: ' + error;
+    if (error) throw "Error updating Company_Users :: " + error;
+
+    // Increment members_length by 1
+    const { error: updateError } = await supabase
+      .from("companies")
+      .update({ members_length: supabase.sql`members_length + 1` })
+      .eq("id", companyId);
+
+    if (updateError) throw "Error updating members_length :: " + updateError;
 
     return data;
   }
 
-  // 5. Leave a company
-  async leaveCompany({ userId, companyId }) {
-    const { error } = await supabase
-      .from("company_members")
-      .delete()
-      .match({ user_id: userId, company_id: companyId });
-    if (error) throw error;
-    return true;
-  }
+  // // 5. Leave a company
+  // async leaveCompany({ userId, companyId }) {
+  //   const { error } = await supabase
+  //     .from("company_users")
+  //     .delete()
+  //     .match({ user_id: userId, company_id: companyId });
+    
+  //   if (error) throw error;
+
+  //   // Decrement members_length by 1
+  //   const { error: updateError } = await supabase
+  //     .from("companies")
+  //     .update({ members_length: supabase.sql`members_length - 1` })
+  //     .eq("id", companyId);
+
+  //   if (updateError) throw "Error updating members_length :: " + updateError;
+
+  //   return true;
+  // }
 
   // 6. Add an expense
-  async addExpense(expense) {
-    const { data, error } = await supabase.from("expenses").insert([expense]);
+  async addExpense(companyId, expense) {
+    const { data, error } = await supabase.from("expenses").insert([{
+      ...expense,
+      company_id: companyId
+    }]);
     if (error) throw error;
     return data;
   }
 
-  // 7. Edit an expense
-  async updateExpense(expenseId, updates) {
-    const { data, error } = await supabase
-      .from("expenses")
-      .update(updates)
-      .eq("id", expenseId);
-    if (error) throw error;
-    return data;
-  }
+  // // 7. Edit an expense
+  // async updateExpense(expenseId, updates) {
+  //   const { data, error } = await supabase
+  //     .from("expenses")
+  //     .update(updates)
+  //     .eq("id", expenseId);
+  //   if (error) throw error;
+  //   return data;
+  // }
 
-  // 8. Delete an expense
-  async deleteExpense(expenseId) {
-    const { error } = await supabase
-      .from("expenses")
-      .delete()
-      .eq("id", expenseId);
-    if (error) throw error;
-    return true;
-  }
+  // // 8. Delete an expense
+  // async deleteExpense(expenseId) {
+  //   const { error } = await supabase
+  //     .from("expenses")
+  //     .delete()
+  //     .eq("id", expenseId);
+  //   if (error) throw error;
+  //   return true;
+  // }
 
   // 9. Add funds
-  async addFund(fund) {
-    const { data, error } = await supabase.from("funds").insert([fund]);
+  async addFund(companyID, fund) {
+    const { data, error } = await supabase.from("funds").insert([{ ...fund, company_id: companyID }]);
     if (error) throw error;
     return data;
   }
 
-  // 10. Update fund details
-  async updateFund(fundId, updates) {
-    const { data, error } = await supabase
-      .from("funds")
-      .update(updates)
-      .eq("id", fundId);
-    if (error) throw error;
-    return data;
-  }
+  // // 10. Update fund details
+  // async updateFund(fundId, updates) {
+  //   const { data, error } = await supabase
+  //     .from("funds")
+  //     .update(updates)
+  //     .eq("id", fundId);
+  //   if (error) throw error;
+  //   return data;
+  // }
 
   // 11. Mark reimbursement status
   async markReimbursement(expenseId, status) {
@@ -124,30 +144,8 @@ export class CompanyService {
 
     if (error) throw error;
 
-    // Calculate totals
-    const totalFunds =
-      data.funds?.reduce((sum, fund) => sum + fund.amount, 0) || 0;
-    const totalExpenses =
-      data.expenses?.reduce((sum, expense) => sum + expense.amount, 0) || 0;
-    const totalReimbursed =
-      data.expenses?.reduce(
-        (sum, expense) => sum + (expense.reimbursed_amount || 0),
-        0
-      ) || 0;
-    const totalPendingReimbursements =
-      data.expenses?.reduce(
-        (sum, expense) =>
-          expense.status === "pending" ? sum + expense.amount : sum,
-        0
-      ) || 0;
-
     return {
       ...data,
-      members: data.company_members?.map((m) => m.user_id) || [],
-      totalFunds,
-      totalExpenses,
-      totalReimbursed,
-      totalPendingReimbursements,
     };
   }
 
@@ -158,7 +156,7 @@ export class CompanyService {
       .select(
         `
         *,
-        profiles:paid_by(name)
+        users:user_id(name)
       `
       )
       .eq("company_id", companyId)
@@ -168,7 +166,7 @@ export class CompanyService {
 
     return (data || []).map((expense) => ({
       ...expense,
-      paidByName: expense.profiles?.name || "Unknown User",
+      paidByName: expense.users?.name || "Unknown User",
       date: new Date(expense.created_at),
     }));
   }
@@ -180,7 +178,7 @@ export class CompanyService {
       .select(
         `
         *,
-        profiles:added_by(name)
+        users:user_id(name)
       `
       )
       .eq("company_id", companyId)
@@ -190,7 +188,7 @@ export class CompanyService {
 
     return (data || []).map((fund) => ({
       ...fund,
-      addedByName: fund.profiles?.name || "Unknown User",
+      addedByName: fund.users?.name || "Unknown User",
       createdAt: new Date(fund.created_at),
     }));
   }
@@ -218,7 +216,8 @@ export class CompanyService {
       .select("company_id")
       .eq("user_id", userId);
 
-    if (error) throw "Error fetching user companies from company_users:: " + error;
+    if (error)
+      throw "Error fetching user companies from company_users:: " + error;
 
     const companyIds = data.map((member) => member.company_id);
     if (companyIds.length === 0) return [];
@@ -228,9 +227,23 @@ export class CompanyService {
       .select("*")
       .in("id", companyIds);
 
-    if (companiesError) throw "Error fetching companies from companies :: " +companiesError;
+    if (companiesError)
+      throw "Error fetching companies from companies :: " + companiesError;
 
     return companies;
+  }
+
+  async getCompanyMembers(companyId) {
+    const { data, error } = await supabase
+      .from("company_users")
+      .select("user_id")
+      .eq("company_id", companyId);
+
+    if (error) throw "Error fetching company members :: " + error;
+
+    return data.map((member) => ({
+      userId: member.user_id,
+    }));
   }
 }
 
