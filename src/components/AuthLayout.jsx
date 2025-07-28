@@ -4,6 +4,7 @@ import { LogOut, User } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../store/authSlice";
 import { useNavigate } from "react-router-dom";
+import Logo from "./Logo";
 
 const AuthLayout = ({ children, title = "MapMyMoney" }) => {
   const user = useSelector((state) => state.auth.user);
@@ -23,9 +24,10 @@ const AuthLayout = ({ children, title = "MapMyMoney" }) => {
   return (
     <div className="min-h-screen bg-gray-900">
       <header className="bg-gray-800 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <div>
+            <div className="flex items-center">
+              <Logo className="h-8 w-8 text-white" />
               <h1 className="text-3xl font-bold text-white">MapMyMoney</h1>
             </div>
             <div className="flex items-center space-x-4">
@@ -46,7 +48,7 @@ const AuthLayout = ({ children, title = "MapMyMoney" }) => {
           </div>
         </div>
       </header>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
     </div>

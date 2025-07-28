@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import AuthLayout from "../components/AuthLayout";
 import Modal from "../components/Modal";
-import { Plus, Building2, Users, TrendingUp } from "lucide-react";
+import { Plus, Users, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import companyService from "../supabase/dataConfig";
 import { useSelector } from "react-redux";
+import Logo from "../components/Logo";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -123,7 +124,7 @@ const Dashboard = () => {
 
         {companies.length === 0 ? (
           <div className="text-center py-12">
-            <Building2 className="mx-auto h-12 w-12 text-gray-600" />
+            <Logo className="mx-auto h-12 w-12 text-gray-600" />
             <h3 className="mt-2 text-sm font-medium text-white">
               No companies
             </h3>
@@ -142,7 +143,7 @@ const Dashboard = () => {
                 <div className="p-6">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <Building2 className="h-8 w-8 text-blue-500" />
+                      <Logo className="h-8 w-8 text-blue-500" />
                     </div>
                     <div className="ml-4 flex-1">
                       <h3 className="text-lg font-medium text-white truncate">

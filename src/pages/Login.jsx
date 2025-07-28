@@ -5,6 +5,7 @@ import { supabase } from "../supabase/supabaseClient";
 import { login } from "../store/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { Building2 } from "lucide-react";
+import Logo from "../components/Logo";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -76,7 +77,7 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-600">
-            <Building2 className="h-8 w-8 text-white" />
+            <Logo className="h-8 w-8 text-white" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
             Sign in to MapMyMoney

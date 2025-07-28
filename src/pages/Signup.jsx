@@ -4,7 +4,7 @@ import { login } from "../store/authSlice";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import authService from "../supabase/auth";
-import { supabase } from "../supabase/supabaseClient";
+import Logo from "../components/Logo";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -77,7 +77,7 @@ const Signup = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-600">
-            <Building2 className="h-8 w-8 text-white" />
+            <Logo className="h-8 w-8 text-white" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
             Create your account
