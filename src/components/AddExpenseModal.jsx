@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Modal from "./Modal";
 import { Upload, X } from "lucide-react";
 import { useSelector } from "react-redux";
+import companyService from "../supabase/dataConfig";
 
 const expenseTypes = [
   "Food",
@@ -19,7 +20,7 @@ const AddExpenseModal = ({ isOpen, onClose, companyId, onExpenseAdded }) => {
     type: "Food",
     description: "",
     date: new Date().toISOString().split("T")[0],
-    user_id : useSelector((state) => state.auth.user.id),
+    user_id: useSelector((state) => state.auth.user.id),
   });
   const [receiptFile, setReceiptFile] = useState(null);
   const [receiptPreview, setReceiptPreview] = useState("");
@@ -65,7 +66,7 @@ const AddExpenseModal = ({ isOpen, onClose, companyId, onExpenseAdded }) => {
     setError("");
 
     try {
-      addExpense(companyId, {
+      companyService.addExpense(companyId, {
         title: formData.title,
         amount: parseFloat(formData.amount),
         type: formData.type,

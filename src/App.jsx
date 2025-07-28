@@ -16,18 +16,20 @@ function App() {
     const checkAuth = async () => {
       try {
         const { user, error } = await authService.getCurrentUserService();
-        console.log("Current user data :: ", user);
-        
+
         if (error) {
-          console.error("Error fetching current user :: ", error);
-          dispatch(logout());
-          navigate("/login");
-          return;
+          if (error.message !== "Auth session missing!") {
+            console.error("Error fetching current user ::" + error);
+
+            dispatch(logout());
+            navigate("/login");
+            return;
+          }
         }
-        
+
         if (user) {
           dispatch(login({ user }));
-          // Don't navigate here, let the user stay on current page
+          navigate("/dashboard");
         } else {
           dispatch(logout());
           navigate("/login");
@@ -42,7 +44,7 @@ function App() {
     };
 
     checkAuth();
-  }, [dispatch, navigate]);
+  }, []);
 
   return loading ? (
     <div className="flex justify-center items-center h-screen bg-gray-900">

@@ -24,13 +24,14 @@ import AddFundsModal from "../components/AddFundsModal";
 const CompanyDetail = () => {
   const { companyId } = useParams();
 
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state) => state.auth);
 
   const navigate = useNavigate();
 
   const [company, setCompany] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [funds, setFunds] = useState([]);
+  const [companyUsers, setCompanyUsers] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
@@ -41,13 +42,13 @@ const CompanyDetail = () => {
 
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const isOwner = user && company && user.id === company.owner_id;
-
   useEffect(() => {
     if (companyId && user.isLoggedIn) {
       loadCompanyData();
     }
   }, [companyId, user.isLoggedIn]);
+
+  const isOwner = user && company && user.user.id === company.owner_id;
 
   const loadCompanyData = async () => {
     if (!companyId) return;
@@ -65,10 +66,13 @@ const CompanyDetail = () => {
 
       const expenseData = await companyService.getCompanyExpenses(companyId);
       const fundData = await companyService.getCompanyFunds(companyId);
+      const companyUsers = await companyService.getCompanyUsers(companyId);
 
       setExpenses(expenseData);
+
       setFunds(fundData);
-      
+
+      setCompanyUsers(companyUsers);
     } catch (error) {
       console.error("Error loading company data:", error);
       // Optionally navigate to dashboard if company not found
@@ -80,8 +84,19 @@ const CompanyDetail = () => {
     }
   };
 
-  const handleReimburse = async (expenseId, amount) => {
+  const handleReimburse = async (expenseId) => {
+    if (!isOwner) return;
 
+    try {
+      const response = await companyService.markReimbursement(
+        expenseId,
+        user.user.id,
+        "Reimbursed"
+      );
+      await loadCompanyData(); // reload UI
+    } catch (error) {
+      console.error("Error reimbursing expense:", error.message);
+    }
   };
 
   const formatCurrency = (amount) => {
@@ -250,7 +265,6 @@ const CompanyDetail = () => {
                 </div>
               </div>
 
-
               {/** Pending Reimbursements */}
               {/* <div className="bg-gray-800 rounded-lg p-6">
                 <div className="flex items-center">
@@ -263,7 +277,6 @@ const CompanyDetail = () => {
                   </div>
                 </div>
               </div> */}
-
 
               {/** Reimbursed Amount */}
               {/* <div className="bg-gray-800 rounded-lg p-6">
@@ -279,7 +292,6 @@ const CompanyDetail = () => {
                   </div>
                 </div>
               </div> */}
-
             </div>
 
             {/* Recent Expenses */}
@@ -394,12 +406,12 @@ const CompanyDetail = () => {
                         >
                           {expense.status}
                         </p>
-                        {/* {expense.reimbursed_amount && (
+                        {expense.reimbursed_amount && (
                           <p className="text-sm text-gray-400">
                             Reimbursed:{" "}
                             {formatCurrency(expense.reimbursed_amount)}
                           </p>
-                        )} */}
+                        )}
                         {isOwner && expense.status === "pending" && (
                           <button
                             onClick={() =>
@@ -453,19 +465,23 @@ const CompanyDetail = () => {
           </div>
         )}
 
-        {/* Activate to members of a company.*/}
-        {/* {activeTab === "members" && (
+        {activeTab === "members" && (
           <div className="bg-gray-800 rounded-lg p-6">
             <h3 className="text-lg font-medium text-white mb-4">
-              Members ({company.members?.length || 0})
+              Members ({company.members_length || 0})
             </h3>
             <div className="space-y-3">
               {company.members_length > 0 ? (
-                companyUsers.user_id.map((memberId) => (
-                  <div key={memberId} className="flex items-center space-x-3">
+                companyUsers.map((user) => (
+                  <div
+                    key={user.users.id}
+                    className="flex items-center space-x-3"
+                  >
                     <Users className="h-5 w-5 text-gray-400" />
-                    <span className="text-white">Member ID: {memberId}</span>
-                    {memberId === company.owner_id && (
+                    <span className="text-white">
+                      Member : {user.users.name}
+                    </span>
+                    {user.users.id === company.owner_id && (
                       <span className="px-2 py-1 text-xs font-medium bg-blue-900 text-blue-200 rounded-full">
                         Owner
                       </span>
@@ -477,7 +493,7 @@ const CompanyDetail = () => {
               )}
             </div>
           </div>
-        )} */}
+        )}
       </div>
 
       {/* Modals */}

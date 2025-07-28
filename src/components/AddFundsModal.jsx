@@ -6,10 +6,12 @@ import { useSelector } from "react-redux";
 
 const AddFundsModal = ({ isOpen, onClose, companyId, onFundsAdded }) => {
 
+  const user = useSelector((state) => state.auth.user);
+  
   const [formData, setFormData] = useState({
     amount: "",
     note: "",
-    user_id: useSelector((state) => state.data.id),
+    user_id: user?.id,
   });
 
   const [loading, setLoading] = useState(false);

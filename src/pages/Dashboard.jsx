@@ -19,13 +19,13 @@ const Dashboard = () => {
 
   const [error, setError] = useState("");
 
-  const user = useSelector((state) => state.auth.user);
+  const {user} = useSelector((state) => state.auth);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     loadCompanies();
-  }, [user]);
+  }, [user, showCreateModal, showJoinModal]);
 
   const loadCompanies = async () => {
     if (!user) return;
@@ -35,7 +35,7 @@ const Dashboard = () => {
       setCompanies(userCompanies);
     } catch (error) {
       console.error(
-        "Error loading companies :: Function getUserComapnies :: ",
+        "Error loading companies :: Function getUserCompanies :: ",
         error
       );
     } finally {
@@ -49,12 +49,12 @@ const Dashboard = () => {
 
     try {
       setError("");
-      await companyService.createCompany({ name: newCompanyName.trim(), ownerId: user.id });
+      const data = await companyService.createCompany({ name: newCompanyName.trim(), ownerId: user.id });
       setNewCompanyName("");
       setShowCreateModal(false);
       loadCompanies();
     } catch (error) {
-      setError("Failed to create company :: " + error.message);
+      setError("Failed to create company :: " + error);
     }
   };
 
@@ -137,7 +137,7 @@ const Dashboard = () => {
               <div
                 key={company.id}
                 className="bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => navigate(`/company/${company.id}`)}
+                onClick={() => navigate(`/CompanyDetail/${company.id}`)}
               >
                 <div className="p-6">
                   <div className="flex items-center">
