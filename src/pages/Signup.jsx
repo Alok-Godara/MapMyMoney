@@ -45,7 +45,6 @@ const Signup = () => {
       
     } catch (error) {
       console.error("Google sign-in error :: ", error);
-      setError("Failed to sign in with Google");
       setLoading(false);
     }
   };
