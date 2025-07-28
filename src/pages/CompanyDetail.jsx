@@ -1,7 +1,7 @@
 import {
   ArrowLeft,
-  DollarSign,
-  Receipt,
+  IndianRupee,
+  ReceiptIndianRupee,
   Users,
   TrendingUp,
   Filter,
@@ -198,7 +198,7 @@ const CompanyDetail = () => {
               onClick={() => setShowAddExpense(true)}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
-              <Receipt className="h-4 w-4 mr-2" />
+              <ReceiptIndianRupee className="h-4 w-4 mr-2" />
               Add Expense
             </button>
             {isOwner && (
@@ -206,7 +206,7 @@ const CompanyDetail = () => {
                 onClick={() => setShowAddFunds(true)}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
               >
-                <DollarSign className="h-4 w-4 mr-2" />
+                <IndianRupee  className="h-4 w-4 mr-2" />
                 Add Funds
               </button>
             )}
@@ -239,7 +239,7 @@ const CompanyDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-gray-800 rounded-lg p-6">
                 <div className="flex items-center">
-                  <DollarSign className="h-8 w-8 text-green-500" />
+                  <IndianRupee  className="h-8 w-8 text-green-500" />
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-400">
                       Available Funds
@@ -453,7 +453,7 @@ const CompanyDetail = () => {
                         <p className="text-gray-300 mt-2">{fund.note}</p>
                       )}
                     </div>
-                    <DollarSign className="h-8 w-8 text-green-500" />
+                    <IndianRupee  className="h-8 w-8 text-green-500" />
                   </div>
                 </div>
               ))

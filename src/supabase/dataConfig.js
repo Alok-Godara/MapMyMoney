@@ -8,7 +8,15 @@ export class CompanyService {
       // First, create the company and get the returned data
       const { data: companyData, error: companyError } = await supabase
         .from("companies")
-        .insert([{ name, owner_id: ownerId, totalFunds: 0, totalExpenses: 0, members_length: 1 }])
+        .insert([
+          {
+            name,
+            owner_id: ownerId,
+            totalFunds: 0,
+            totalExpenses: 0,
+            members_length: 1,
+          },
+        ])
         .select() // This ensures we get the inserted data back
         .single(); // Get single object instead of array
 
@@ -18,10 +26,11 @@ export class CompanyService {
       }
 
       // Then, add the owner to company_users table
-      const { data: companyUsersData, error: companyUsersError } = await supabase
-        .from("company_users")
-        .insert([{ user_id: ownerId, company_id: companyData.id }])
-        .select();
+      const { data: companyUsersData, error: companyUsersError } =
+        await supabase
+          .from("company_users")
+          .insert([{ user_id: ownerId, company_id: companyData.id }])
+          .select();
 
       if (companyUsersError) {
         console.log("Error adding user to company :: ", companyUsersError);
@@ -64,9 +73,20 @@ export class CompanyService {
     if (error) throw "Error updating Company_Users :: " + error;
 
     // Increment members_length by 1
+    const { data: companyData, error: fetchError } = await supabase
+      .from("companies")
+      .select("members_length")
+      .eq("id", companyId)
+      .single();
+
+    if (fetchError)
+      throw "Error fetching current members_length :: " + fetchError;
+
+    const newLength = (companyData?.members_length || 0) + 1;
+
     const { error: updateError } = await supabase
       .from("companies")
-      .update({ members_length: supabase.sql`members_length + 1` })
+      .update({ members_length: newLength })
       .eq("id", companyId);
 
     if (updateError) throw "Error updating members_length :: " + updateError;
@@ -80,7 +100,7 @@ export class CompanyService {
   //     .from("company_users")
   //     .delete()
   //     .match({ user_id: userId, company_id: companyId });
-    
+
   //   if (error) throw error;
 
   //   // Decrement members_length by 1
@@ -96,17 +116,34 @@ export class CompanyService {
 
   // 6. Add an expense
   async addExpense(companyId, expense) {
-    const { data, error } = await supabase.from("expenses").insert([{
-      ...expense,
-      company_id: companyId
-    }]);
-    if (error) throw error;
+    // Insert the expense
+    const { data, error } = await supabase.from("expenses").insert([
+      {
+        ...expense,
+        company_id: companyId,
+      },
+    ]);
+    if (error) throw "Error inserting expense :: " + error;
 
-    const { error: companyError } = await supabase.from("companies").update({
-      totalExpenses: supabase.sql`totalExpenses + ${expense.amount}`
-    }).eq("id", companyId);
+    // Fetch current totalExpenses
+    const { data: companyData, error: fetchError } = await supabase
+      .from("companies")
+      .select("totalExpenses")
+      .eq("id", companyId)
+      .single();
 
-    if (companyError) throw companyError;
+    if (fetchError) throw "Error fetching totalExpenses :: " + fetchError;
+
+    const currentTotal = companyData?.totalExpenses || 0;
+    const newTotal = currentTotal + expense.amount;
+
+    // Update totalExpenses with new value
+    const { error: updateError } = await supabase
+      .from("companies")
+      .update({ totalExpenses: newTotal })
+      .eq("id", companyId);
+
+    if (updateError) throw "Error updating totalExpenses :: " + updateError;
 
     return data;
   }
@@ -133,14 +170,28 @@ export class CompanyService {
 
   // 9. Add funds
   async addFund(companyID, fund) {
-    const { data, error } = await supabase.from("funds").insert([{ ...fund, company_id: companyID }]);
+    const { data, error } = await supabase
+      .from("funds")
+      .insert([{ ...fund, company_id: companyID }]);
     if (error) throw error;
 
-    const { error: companyError } = await supabase.from("companies").update({
-      totalFunds: supabase.sql`totalFunds + ${fund.amount}`
-    }).eq("id", companyID);
+    // Update the company's total funds
+    const { data: companyData, error: fetchError } = await supabase
+      .from("companies")
+      .select("totalFunds")
+      .eq("id", companyID)
+      .single();
 
-    if (companyError) throw companyError;
+    if (fetchError) throw fetchError;
+
+    const newTotal = companyData.totalFunds + fund.amount;
+
+    const { error: updateError } = await supabase
+      .from("companies")
+      .update({ totalFunds: newTotal })
+      .eq("id", companyID);
+
+    if (updateError) throw updateError;
 
     return data;
   }
@@ -159,7 +210,7 @@ export class CompanyService {
   async markReimbursement(expenseId, userId, status) {
     const { data, error } = await supabase
       .from("expenses")
-      .update({ status: status, user_id : userId })
+      .update({ status: status, user_id: userId })
       .eq("id", expenseId);
     if (error) throw error;
     return "done";
@@ -274,13 +325,15 @@ export class CompanyService {
   async getCompanyUsers(companyId) {
     const { data, error } = await supabase
       .from("company_users")
-      .select(`
+      .select(
+        `
         users : user_id(id, name)
-        `)
+        `
+      )
       .eq("company_id", companyId);
 
     if (error) throw "Error fetching company members :: " + error;
-    
+
     return data;
   }
 

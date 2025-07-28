@@ -50,6 +50,22 @@ export class AuthService {
       console.error("Supabase service :: logout :: error", error);
     }
   }
+
+  async signInWithGoogle() {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/Dashboard`
+        }
+      });
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Supabase service :: signInWithGoogle :: error", error);
+      throw error;
+    }
+  }
 }
 
 const authService = new AuthService();
