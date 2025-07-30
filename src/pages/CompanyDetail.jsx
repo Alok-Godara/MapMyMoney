@@ -347,14 +347,14 @@ const CompanyDetail = () => {
         )}
 
         {activeTab === "expenses" && (
-          <div className="space-y-4">
-            <div className="flex items-center space-x-4">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
               <div className="flex items-center space-x-2">
                 <Filter className="h-4 w-4 text-gray-400" />
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="bg-gray-800 border border-gray-600 text-white rounded-md px-3 py-1 text-sm"
+                  className="bg-gray-800 border border-gray-600 text-white rounded-md px-3 py-2 text-sm w-full sm:w-auto"
                 >
                   <option value="all">All Status</option>
                   <option value="pending">Pending</option>
@@ -363,84 +363,154 @@ const CompanyDetail = () => {
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {filteredExpenses.length > 0 ? (
                 filteredExpenses.map((expense) => (
-                  <div key={expense.id} className="bg-gray-800 rounded-lg p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex ">
-                        <div>
-                          <div className="flex items-center space-x-3 mb-2">
-                            {getStatusIcon(expense.status)}
-                            <h3 className="text-lg font-medium text-white">
-                              {expense.title}
-                            </h3>
-                            <span className="px-2 py-1 text-xs font-medium bg-blue-900 text-blue-200 rounded-full">
-                              {expense.type}
-                            </span>
-                          </div>
-                          <p className="text-gray-400 mb-2">
+                  <div key={expense.id} className="bg-gray-800 rounded-lg p-4 sm:p-6">
+                    {/* Mobile Layout */}
+                    <div className="block sm:hidden">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center space-x-2">
+                          {getStatusIcon(expense.status)}
+                          <h3 className="text-base font-medium text-white truncate">
+                            {expense.title}
+                          </h3>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-white">
+                            {formatCurrency(expense.amount)}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="px-2 py-1 text-xs font-medium bg-blue-900 text-blue-200 rounded-full">
+                            {expense.type}
+                          </span>
+                          <span className={`text-xs capitalize font-medium ${getStatusColor(expense.status)}`}>
+                            {expense.status}
+                          </span>
+                        </div>
+                        
+                        {expense.description && (
+                          <p className="text-sm text-gray-400">
                             {expense.description}
                           </p>
-                          <div className="flex items-center space-x-4 text-sm text-gray-400">
-                            <span className="flex items-center">
-                              <User className="h-4 w-4 mr-1" />
-                              {expense.paidByName}
-                            </span>
-                            <span className="flex items-center">
-                              <Calendar className="h-4 w-4 mr-1" />
-                              {formatDate(expense.date)}
-                            </span>
-                          </div>
+                        )}
+                        
+                        <div className="flex items-center justify-between text-xs text-gray-400">
+                          <span className="flex items-center">
+                            <User className="h-3 w-3 mr-1" />
+                            {expense.paidByName}
+                          </span>
+                          <span className="flex items-center">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            {formatDate(expense.date)}
+                          </span>
                         </div>
-                        <div className="ml-15 max-h-25">
-                          {expense.image_url && (
+                        
+                        {expense.image_url && (
+                          <div className="mt-2">
                             <img
                               src={expense.image_url}
                               alt={expense.title}
-                              className="mt-2 max-h-full rounded-lg hover:cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                              className="w-full h-32 object-cover rounded-lg hover:cursor-pointer hover:opacity-80 transition-opacity duration-200"
                               onClick={() => {
                                 setSelectedImage(expense.image_url);
                                 setShowReceiptModal(true);
                               }}
                             />
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-right ml-6">
-                        <p className="text-xl font-bold text-white mb-1">
-                          {formatCurrency(expense.amount)}
-                        </p>
-                        <p
-                          className={`text-sm capitalize font-medium ${getStatusColor(
-                            expense.status
-                          )}`}
-                        >
-                          {expense.status}
-                        </p>
+                          </div>
+                        )}
+                        
                         {expense.reimbursed_amount && (
-                          <p className="text-sm text-gray-400">
-                            Reimbursed:{" "}
-                            {formatCurrency(expense.reimbursed_amount)}
+                          <p className="text-xs text-gray-400">
+                            Reimbursed: {formatCurrency(expense.reimbursed_amount)}
                           </p>
                         )}
+                        
                         {isOwner && expense.status === "pending" && (
                           <button
-                            onClick={() =>
-                              handleReimburse(expense.id, expense.amount)
-                            }
-                            className="mt-2 text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md"
+                            onClick={() => handleReimburse(expense.id, expense.amount)}
+                            className="w-full text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md"
                           >
                             Mark Reimbursed
                           </button>
                         )}
                       </div>
                     </div>
+
+                    {/* Desktop Layout */}
+                    <div className="hidden sm:block">
+                      <div className="flex items-start justify-between">
+                        <div className="flex flex-1">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-2">
+                              {getStatusIcon(expense.status)}
+                              <h3 className="text-lg font-medium text-white">
+                                {expense.title}
+                              </h3>
+                              <span className="px-2 py-1 text-xs font-medium bg-blue-900 text-blue-200 rounded-full">
+                                {expense.type}
+                              </span>
+                            </div>
+                            <p className="text-gray-400 mb-2">
+                              {expense.description}
+                            </p>
+                            <div className="flex items-center space-x-4 text-sm text-gray-400">
+                              <span className="flex items-center">
+                                <User className="h-4 w-4 mr-1" />
+                                {expense.paidByName}
+                              </span>
+                              <span className="flex items-center">
+                                <Calendar className="h-4 w-4 mr-1" />
+                                {formatDate(expense.date)}
+                              </span>
+                            </div>
+                          </div>
+                          {expense.image_url && (
+                            <div className="ml-6 w-24 h-24">
+                              <img
+                                src={expense.image_url}
+                                alt={expense.title}
+                                className="w-full h-full object-cover rounded-lg hover:cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                                onClick={() => {
+                                  setSelectedImage(expense.image_url);
+                                  setShowReceiptModal(true);
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right ml-6">
+                          <p className="text-xl font-bold text-white mb-1">
+                            {formatCurrency(expense.amount)}
+                          </p>
+                          <p className={`text-sm capitalize font-medium ${getStatusColor(expense.status)}`}>
+                            {expense.status}
+                          </p>
+                          {expense.reimbursed_amount && (
+                            <p className="text-sm text-gray-400">
+                              Reimbursed: {formatCurrency(expense.reimbursed_amount)}
+                            </p>
+                          )}
+                          {isOwner && expense.status === "pending" && (
+                            <button
+                              onClick={() => handleReimburse(expense.id, expense.amount)}
+                              className="mt-2 text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md"
+                            >
+                              Mark Reimbursed
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8">
-                  <p className="text-gray-400">No expenses found</p>
+                <div className="text-center py-6 sm:py-8">
+                  <p className="text-sm sm:text-base text-gray-400">No expenses found</p>
                 </div>
               )}
             </div>
@@ -448,60 +518,61 @@ const CompanyDetail = () => {
         )}
 
         {activeTab === "funds" && (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {funds.length > 0 ? (
               funds.map((fund) => (
-                <div key={fund.id} className="bg-gray-800 rounded-lg p-6">
+                <div key={fund.id} className="bg-gray-800 rounded-lg p-4 sm:p-6">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-lg font-medium text-white">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-base sm:text-lg font-medium text-white">
                         {formatCurrency(fund.amount)}
                       </p>
-                      <p className="text-sm text-gray-400">
-                        Added by {fund.addedByName} •{" "}
-                        {formatDate(fund.createdAt)}
+                      <p className="text-xs sm:text-sm text-gray-400 truncate">
+                        Added by {fund.addedByName} • {formatDate(fund.createdAt)}
                       </p>
                       {fund.note && (
-                        <p className="text-gray-300 mt-2">{fund.note}</p>
+                        <p className="text-sm sm:text-base text-gray-300 mt-2 break-words">{fund.note}</p>
                       )}
                     </div>
-                    <IndianRupee className="h-8 w-8 text-green-500" />
+                    <IndianRupee className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 ml-3 flex-shrink-0" />
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-400">No funds added yet</p>
+              <div className="text-center py-6 sm:py-8">
+                <p className="text-sm sm:text-base text-gray-400">No funds added yet</p>
               </div>
             )}
           </div>
         )}
 
         {activeTab === "members" && (
-          <div className="bg-gray-800 rounded-lg p-6">
-            <h3 className="text-lg font-medium text-white mb-4">
+          <div className="bg-gray-800 rounded-lg p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-medium text-white mb-3 sm:mb-4">
               Members ({company.members_length || 0})
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {company.members_length > 0 ? (
                 companyUsers.map((user) => (
                   <div
                     key={user.users.id}
-                    className="flex items-center space-x-3"
+                    className="flex items-center justify-between sm:justify-start sm:space-x-3 p-2 sm:p-0 rounded-lg sm:rounded-none bg-gray-700 sm:bg-transparent"
                   >
-                    <Users className="h-5 w-5 text-gray-400" />
-                    <span className="text-white">
-                      Member : {user.users.name}
-                    </span>
+                    <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+                      <Users className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
+                      <span className="text-sm sm:text-base text-white truncate">
+                        {user.users.name}
+                      </span>
+                    </div>
                     {user.users.id === company.owner_id && (
-                      <span className="px-2 py-1 text-xs font-medium bg-blue-900 text-blue-200 rounded-full">
+                      <span className="px-2 py-1 text-xs font-medium bg-blue-900 text-blue-200 rounded-full flex-shrink-0">
                         Owner
                       </span>
                     )}
                   </div>
                 ))
               ) : (
-                <p className="text-gray-400 text-center">No members found</p>
+                <p className="text-sm sm:text-base text-gray-400 text-center py-4">No members found</p>
               )}
             </div>
           </div>
