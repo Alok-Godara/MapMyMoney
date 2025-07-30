@@ -14,20 +14,19 @@ const expenseTypes = [
 ];
 
 const AddExpenseModal = ({ isOpen, onClose, companyId, onExpenseAdded }) => {
+  const { user } = useSelector((state) => state.auth);
+  
   const [formData, setFormData] = useState({
     title: "",
     amount: "",
     type: "Food",
     description: "",
     date: new Date().toISOString().split("T")[0],
-    user_id: useSelector((state) => state.auth.user.id),
   });
   const [receiptFile, setReceiptFile] = useState(null);
   const [receiptPreview, setReceiptPreview] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const { user } = useSelector((state) => state.auth);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -66,16 +65,17 @@ const AddExpenseModal = ({ isOpen, onClose, companyId, onExpenseAdded }) => {
     setError("");
 
     try {
-      companyService.addExpense(companyId, {
+      const result = await companyService.addExpense(companyId, {
         title: formData.title,
         amount: parseFloat(formData.amount),
         type: formData.type,
         description: formData.description,
         created_at: new Date(formData.date),
-        user_id: formData.user_id,
+        user_id: user.id, // Use user.id instead of formData.user_id
         image_url: receiptPreview || undefined,
         status: "pending",
       });
+
 
       // Reset form
       setFormData({
@@ -85,12 +85,13 @@ const AddExpenseModal = ({ isOpen, onClose, companyId, onExpenseAdded }) => {
         description: "",
         date: new Date().toISOString().split("T")[0],
       });
+
+      onExpenseAdded(); // This should refresh the company data
       setReceiptFile(null);
       setReceiptPreview("");
-
-      onExpenseAdded();
       onClose();
     } catch (error) {
+      console.error("Error adding expense:", error);
       setError("Failed to add expense. Please try again.");
     } finally {
       setLoading(false);

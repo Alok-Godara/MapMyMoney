@@ -16,7 +16,6 @@ export class AuthService {
         .insert([{ id: data.user.id, name, email: data.user.email }]);
       return { user: data.user, error: null };
     } catch (error) {
-      console.log("Supabase service :: createAccount :: error", error);
       return { user: null, error };
     }
   }
@@ -60,21 +59,10 @@ export class AuthService {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/Dashboard`,
+          redirectTo: String(import.meta.env.VITE_REDIRECT_URL),
         },
       });
       if (error) throw error;
-      
-      await supabase
-        .from("users")
-        .insert([
-          {
-            id: data.user.id,
-            name: data.user.user_metadata.full_name,
-            email: data.user.email,
-          },
-        ])
-        .select();
 
       return data;
     } catch (error) {

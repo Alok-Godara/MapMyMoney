@@ -20,13 +20,13 @@ const Dashboard = () => {
 
   const [error, setError] = useState("");
 
-  const {user} = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     loadCompanies();
-  }, [user, showCreateModal, showJoinModal]);
+  }, [showCreateModal, showJoinModal]);
 
   const loadCompanies = async () => {
     if (!user) return;
@@ -50,7 +50,10 @@ const Dashboard = () => {
 
     try {
       setError("");
-      const data = await companyService.createCompany({ name: newCompanyName.trim(), ownerId: user.id });
+      const data = await companyService.createCompany({
+        name: newCompanyName.trim(),
+        ownerId: user.id,
+      });
       setNewCompanyName("");
       setShowCreateModal(false);
       loadCompanies();
@@ -61,16 +64,19 @@ const Dashboard = () => {
 
   const handleJoinCompany = async (e) => {
     e.preventDefault();
-    if (!user || !joinCompanyId.trim()) return;
+    // if (!user || !joinCompanyId.trim()) return;
 
     try {
       setError("");
-      await companyService.joinCompany({ userId: user.id, companyId: joinCompanyId.trim() });
+      await companyService.joinCompany({
+        userId: user.id,
+        companyId: joinCompanyId.trim(),
+      });
       setJoinCompanyId("");
       setShowJoinModal(false);
       loadCompanies();
     } catch (error) {
-      console.error("Error joining company :: ", error);
+      console.error("Error joining company :: ", error.message);
       setError("Failed to join company. Please check the company ID.");
     }
   };

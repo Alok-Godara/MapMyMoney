@@ -46,7 +46,7 @@ const CompanyDetail = () => {
     if (companyId && user.isLoggedIn) {
       loadCompanyData();
     }
-  }, [companyId, user.isLoggedIn]);
+  }, [companyId, user.isLoggedIn, showAddFunds, showAddExpense]);
 
   const isOwner = user && company && user.user.id === company.owner_id;
 
@@ -351,7 +351,6 @@ const CompanyDetail = () => {
                 >
                   <option value="all">All Status</option>
                   <option value="pending">Pending</option>
-                  <option value="partial">Partial</option>
                   <option value="reimbursed">Reimbursed</option>
                 </select>
               </div>

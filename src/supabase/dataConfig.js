@@ -21,7 +21,6 @@ export class CompanyService {
         .single(); // Get single object instead of array
 
       if (companyError) {
-        console.log("Error creating company :: ", companyError);
         throw companyError;
       }
 
@@ -33,7 +32,6 @@ export class CompanyService {
           .select();
 
       if (companyUsersError) {
-        console.log("Error adding user to company :: ", companyUsersError);
         throw companyUsersError;
       }
 
@@ -116,6 +114,9 @@ export class CompanyService {
 
   // 6. Add an expense
   async addExpense(companyId, expense) {
+    if (typeof expense.amount !== "number" || isNaN(expense.amount)) {
+      throw new Error("Invalid expense amount");
+    }
     // Insert the expense
     const { data, error } = await supabase.from("expenses").insert([
       {
@@ -125,25 +126,28 @@ export class CompanyService {
     ]);
     if (error) throw "Error inserting expense :: " + error;
 
-    // Fetch current totalExpenses
+    // Fetch current totalExpenses and totalFunds
     const { data: companyData, error: fetchError } = await supabase
       .from("companies")
-      .select("totalExpenses")
+      .select("totalExpenses, totalFunds")
       .eq("id", companyId)
       .single();
 
     if (fetchError) throw "Error fetching totalExpenses :: " + fetchError;
 
-    const currentTotal = companyData?.totalExpenses || 0;
-    const newTotal = currentTotal + expense.amount;
+    const currentTotalExpenses = companyData?.totalExpenses || 0;
+    const currentTotalFunds = companyData?.totalFunds || 0;
+    const newTotalExpense = currentTotalExpenses + expense.amount;
+    const newTotalFunds = currentTotalFunds - expense.amount;
 
     // Update totalExpenses with new value
     const { error: updateError } = await supabase
       .from("companies")
-      .update({ totalExpenses: newTotal })
+      .update({ totalExpenses: newTotalExpense, totalFunds: newTotalFunds })
       .eq("id", companyId);
 
-    if (updateError) throw "Error updating totalExpenses :: " + updateError;
+    if (updateError)
+      throw new Error("Error updating totalExpenses :: " + updateError.message);
 
     return data;
   }
