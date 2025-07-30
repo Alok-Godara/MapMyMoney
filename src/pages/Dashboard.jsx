@@ -35,10 +35,6 @@ const Dashboard = () => {
       const userCompanies = await companyService.getUserCompanies(user.id);
       setCompanies(userCompanies);
     } catch (error) {
-      console.error(
-        "Error loading companies :: Function getUserCompanies :: ",
-        error
-      );
     } finally {
       setLoading(false);
     }
@@ -76,7 +72,6 @@ const Dashboard = () => {
       setShowJoinModal(false);
       loadCompanies();
     } catch (error) {
-      console.error("Error joining company :: ", error.message);
       setError("Failed to join company. Please check the company ID.");
     }
   };

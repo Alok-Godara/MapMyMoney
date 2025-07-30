@@ -19,8 +19,6 @@ function App() {
 
         if (error) {
           if (error.message !== "Auth session missing!") {
-            console.error("Error fetching current user ::" + error);
-
             dispatch(logout());
             navigate("/login");
             return;
@@ -35,7 +33,6 @@ function App() {
           navigate("/login");
         }
       } catch (error) {
-        console.error("Auth check failed :: ", error);
         dispatch(logout());
         navigate("/login");
       } finally {

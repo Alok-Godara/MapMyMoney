@@ -17,7 +17,6 @@ const AuthLayout = ({ children, title = "MapMyMoney" }) => {
       dispatch(logout());
       navigate("/login");
     } catch (error) {
-      console.error("Error signing out:", error);
     }
   };
 

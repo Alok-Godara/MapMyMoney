@@ -34,7 +34,6 @@ const AddFundsModal = ({ isOpen, onClose, companyId, onFundsAdded }) => {
       onFundsAdded();
       onClose();
     } catch (error) {
-      console.error("Error adding funds:", error);
       setError("Failed to add funds. Please try again.");
     } finally {
       setLoading(false);

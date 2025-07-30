@@ -24,7 +24,6 @@ const Login = () => {
       const { data, error } = await authService.signInWithGoogle();
 
       if (error) {
-        console.error("Error signing in with Google :: ", error);
         setError(error.message);
         setLoading(false);
         return;
@@ -34,7 +33,6 @@ const Login = () => {
       // will be handled by the App.jsx useEffect when they return
 
       if (error) {
-        console.error("Error signing in with Google :: ", error);
         setError(error.message);
         setLoading(false);
         return;
@@ -44,7 +42,6 @@ const Login = () => {
       // will be handled by the App.jsx useEffect when they return
       
     } catch (error) {
-      console.error("Google sign-in error :: ", error);
       setLoading(false);
     }
   };
@@ -59,7 +56,7 @@ const Login = () => {
     });
 
     if (error) {
-      console.error("Error signing in :: ", error);
+      // console.error("Error signing in :: ", error);
       setError(error.message);
       setLoading(false);
       return;

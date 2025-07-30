@@ -74,7 +74,6 @@ const CompanyDetail = () => {
 
       setCompanyUsers(companyUsers);
     } catch (error) {
-      console.error("Error loading company data:", error);
       // Optionally navigate to dashboard if company not found
       if (error.message?.includes("No rows") || error.code === "PGRST116") {
         navigate("/dashboard");
@@ -91,11 +90,10 @@ const CompanyDetail = () => {
       const response = await companyService.markReimbursement(
         expenseId,
         user.user.id,
-        "Reimbursed"
+        "reimbursed"
       );
       await loadCompanyData(); // reload UI
     } catch (error) {
-      console.error("Error reimbursing expense:", error.message);
     }
   };
 

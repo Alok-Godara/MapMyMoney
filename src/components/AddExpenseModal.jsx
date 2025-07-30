@@ -44,6 +44,17 @@ const AddExpenseModal = ({ isOpen, onClose, companyId, onExpenseAdded }) => {
         setReceiptPreview(e.target?.result || "");
       };
       reader.readAsDataURL(file);
+
+    const url = companyService.uploadReceipt(
+        file,
+        companyId,
+        user.id
+      );
+      if (error) {
+        setError("Failed to upload receipt. Please try again.");
+        return;
+      }
+      setReceiptPreview(url || "");
     }
   };
 
@@ -91,7 +102,6 @@ const AddExpenseModal = ({ isOpen, onClose, companyId, onExpenseAdded }) => {
       setReceiptPreview("");
       onClose();
     } catch (error) {
-      console.error("Error adding expense:", error);
       setError("Failed to add expense. Please try again.");
     } finally {
       setLoading(false);

@@ -29,7 +29,7 @@ export class AuthService {
       if (error) return { user: null, error };
       return { user: data.user, error: null };
     } catch (error) {
-      console.error("Supabase service :: login :: error", error);
+      // console.error("Supabase service :: login :: error", error);
       return { user: null, error };
     }
   }
@@ -40,7 +40,7 @@ export class AuthService {
       if (error) return { user: null, error };
       return { user: data.user, error: null };
     } catch (error) {
-      console.error("Supabase service :: getCurrentUser :: error", error);
+      // console.error("Supabase service :: getCurrentUser :: error", error);
       return { user: null, error };
     }
   }
@@ -50,7 +50,7 @@ export class AuthService {
       await supabase.auth.signOut();
       return true;
     } catch (error) {
-      console.error("Supabase service :: logout :: error", error);
+      // console.error("Supabase service :: logout :: error", error);
     }
   }
 
@@ -66,7 +66,7 @@ export class AuthService {
 
       return data;
     } catch (error) {
-      console.error("Supabase service :: signInWithGoogle :: error", error);
+      // console.error("Supabase service :: signInWithGoogle :: error", error);
       throw error;
     }
   }

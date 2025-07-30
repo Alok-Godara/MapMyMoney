@@ -1,5 +1,6 @@
 // src/services/companyService.js
 import { supabase } from "./supabaseClient";
+import { useState } from "react";
 
 export class CompanyService {
   // 1. Create a new company
@@ -37,7 +38,7 @@ export class CompanyService {
 
       return companyData;
     } catch (error) {
-      console.error("CreateCompany error :: ", error);
+      // console.error("CreateCompany error :: ", error);
       throw error;
     }
   }
@@ -150,6 +151,49 @@ export class CompanyService {
       throw new Error("Error updating totalExpenses :: " + updateError.message);
 
     return data;
+  }
+
+  // Upload receipt
+  async uploadReceipt(file, company, userId) {
+    if (!file || !company) {
+      throw new Error("Missing file or company name");
+    }
+
+    try {
+      const timestamp = new Date();
+      const datePart = timestamp.toISOString().split("T")[0]; // YYYY-MM-DD
+      const timePart = timestamp
+        .toTimeString()
+        .split(" ")[0]
+        .replace(/:/g, "-"); // HH-MM-SS
+
+      const originalName = file.name.split(".").slice(0, -1).join("."); // Remove extension
+      const extension = file.name.split(".").pop();
+
+      const fileName = `${originalName} - ${timePart} - ${datePart}.${extension}`;
+
+      const uploadPath = `receipts/${company}/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from("bills")
+        .upload(uploadPath, file, {
+          upsert: false,
+          cacheControl: "3600",
+          metadata: { owner: userId },
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from("bills")
+        .getPublicUrl(uploadPath);
+
+      return urlData.publicUrl;
+    } catch (error) {
+      throw error;
+    }
   }
 
   // // 7. Edit an expense
