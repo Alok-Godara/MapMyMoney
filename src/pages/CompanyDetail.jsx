@@ -20,6 +20,7 @@ import companyService from "../supabase/dataConfig";
 import AuthLayout from "../components/AuthLayout";
 import AddExpenseModal from "../components/AddExpenseModal";
 import AddFundsModal from "../components/AddFundsModal";
+import ReceiptModal from "../components/ReceiptModal";
 
 const CompanyDetail = () => {
   const { companyId } = useParams();
@@ -32,6 +33,7 @@ const CompanyDetail = () => {
   const [expenses, setExpenses] = useState([]);
   const [funds, setFunds] = useState([]);
   const [companyUsers, setCompanyUsers] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const [loading, setLoading] = useState(true);
 
@@ -39,25 +41,30 @@ const CompanyDetail = () => {
 
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showAddFunds, setShowAddFunds] = useState(false);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
 
   const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
-    if (companyId && user.isLoggedIn) {
+    if (companyId && user?.user) {
       loadCompanyData();
     }
-  }, [companyId, user.isLoggedIn, showAddFunds, showAddExpense]);
+  }, [companyId, user?.user]);
 
-  const isOwner = user && company && user.user.id === company.owner_id;
+  const isOwner = user?.user && company && user.user.id === company.owner_id;
 
   const loadCompanyData = async () => {
     if (!companyId) return;
 
     try {
       setLoading(true);
+      console.log("Loading company data for ID:", companyId);
+      
       const companyData = await companyService.getCompanyById(companyId);
+      console.log("Company data loaded:", companyData);
 
       if (!companyData) {
+        console.log("No company data found, navigating to dashboard");
         navigate("/dashboard");
         return;
       }
@@ -68,12 +75,15 @@ const CompanyDetail = () => {
       const fundData = await companyService.getCompanyFunds(companyId);
       const companyUsers = await companyService.getCompanyUsers(companyId);
 
+      console.log("Expenses:", expenseData);
+      console.log("Funds:", fundData);
+      console.log("Users:", companyUsers);
+
       setExpenses(expenseData);
-
       setFunds(fundData);
-
       setCompanyUsers(companyUsers);
     } catch (error) {
+      console.error("Error loading company data:", error);
       // Optionally navigate to dashboard if company not found
       if (error.message?.includes("No rows") || error.code === "PGRST116") {
         navigate("/dashboard");
@@ -93,8 +103,7 @@ const CompanyDetail = () => {
         "reimbursed"
       );
       await loadCompanyData(); // reload UI
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const formatCurrency = (amount) => {
@@ -138,7 +147,7 @@ const CompanyDetail = () => {
     (expense) => statusFilter === "all" || expense.status === statusFilter
   );
 
-  if (!user.isLoggedIn) {
+  if (!user?.user) {
     return (
       <AuthLayout>
         <div className="flex justify-center items-center h-64">
@@ -204,7 +213,7 @@ const CompanyDetail = () => {
                 onClick={() => setShowAddFunds(true)}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
               >
-                <IndianRupee  className="h-4 w-4 mr-2" />
+                <IndianRupee className="h-4 w-4 mr-2" />
                 Add Funds
               </button>
             )}
@@ -237,7 +246,7 @@ const CompanyDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-gray-800 rounded-lg p-6">
                 <div className="flex items-center">
-                  <IndianRupee  className="h-8 w-8 text-green-500" />
+                  <IndianRupee className="h-8 w-8 text-green-500" />
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-400">
                       Available Funds
@@ -359,38 +368,44 @@ const CompanyDetail = () => {
                 filteredExpenses.map((expense) => (
                   <div key={expense.id} className="bg-gray-800 rounded-lg p-6">
                     <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          {getStatusIcon(expense.status)}
-                          <h3 className="text-lg font-medium text-white">
-                            {expense.title}
-                          </h3>
-                          <span className="px-2 py-1 text-xs font-medium bg-blue-900 text-blue-200 rounded-full">
-                            {expense.type}
-                          </span>
+                      <div className="flex ">
+                        <div>
+                          <div className="flex items-center space-x-3 mb-2">
+                            {getStatusIcon(expense.status)}
+                            <h3 className="text-lg font-medium text-white">
+                              {expense.title}
+                            </h3>
+                            <span className="px-2 py-1 text-xs font-medium bg-blue-900 text-blue-200 rounded-full">
+                              {expense.type}
+                            </span>
+                          </div>
+                          <p className="text-gray-400 mb-2">
+                            {expense.description}
+                          </p>
+                          <div className="flex items-center space-x-4 text-sm text-gray-400">
+                            <span className="flex items-center">
+                              <User className="h-4 w-4 mr-1" />
+                              {expense.paidByName}
+                            </span>
+                            <span className="flex items-center">
+                              <Calendar className="h-4 w-4 mr-1" />
+                              {formatDate(expense.date)}
+                            </span>
+                          </div>
                         </div>
-                        <p className="text-gray-400 mb-2">
-                          {expense.description}
-                        </p>
-                        <div className="flex items-center space-x-4 text-sm text-gray-400">
-                          <span className="flex items-center">
-                            <User className="h-4 w-4 mr-1" />
-                            {expense.paidByName}
-                          </span>
-                          <span className="flex items-center">
-                            <Calendar className="h-4 w-4 mr-1" />
-                            {formatDate(expense.date)}
-                          </span>
-                        </div>
-                        {expense.receipt_url && (
-                          <div className="mt-3">
+                        <div className="ml-15 max-h-25">
+                          {expense.image_url && (
                             <img
                               src={expense.image_url}
-                              alt="Receipt"
-                              className="h-20 w-20 object-cover rounded-md border border-gray-600"
+                              alt={expense.title}
+                              className="mt-2 max-h-full rounded-lg hover:cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                              onClick={() => {
+                                setSelectedImage(expense.image_url);
+                                setShowReceiptModal(true);
+                              }}
                             />
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                       <div className="text-right ml-6">
                         <p className="text-xl font-bold text-white mb-1">
@@ -450,7 +465,7 @@ const CompanyDetail = () => {
                         <p className="text-gray-300 mt-2">{fund.note}</p>
                       )}
                     </div>
-                    <IndianRupee  className="h-8 w-8 text-green-500" />
+                    <IndianRupee className="h-8 w-8 text-green-500" />
                   </div>
                 </div>
               ))
@@ -501,6 +516,11 @@ const CompanyDetail = () => {
             onClose={() => setShowAddExpense(false)}
             companyId={companyId}
             onExpenseAdded={loadCompanyData}
+          />
+          <ReceiptModal
+            isOpen={showReceiptModal}
+            onClose={() => setShowReceiptModal(false)}
+            imageUrl={selectedImage}
           />
           {isOwner && (
             <AddFundsModal

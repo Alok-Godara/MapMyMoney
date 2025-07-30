@@ -40,7 +40,7 @@ const AuthLayout = ({ children, title = "MapMyMoney" }) => {
                 onClick={handleSignOut}
                 className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white text-sm font-medium transition-colors"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-4 w-4 hover:cursor-pointer" />
                 <span>Sign Out</span>
               </button>
             </div>
