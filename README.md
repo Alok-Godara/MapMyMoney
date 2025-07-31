@@ -72,19 +72,19 @@ create table expenses (
   SUPABASE_URL=your-supabase-url
   SUPABASE_ANON_KEY=your-anon-key
 
---
+---
 
 ## 🖼️ Image Upload
 - Images for expenses are uploaded using Supabase Storage.
 - A public bucket is used to generate preview links for images.
 
---
+---
 
 ## 🧠 Project Philosophy
 - Financial transparency within teams and groups can improve trust, reduce conflicts, and help build sustainable communities.
 - MapMyMoney brings that transparency with simplicity.
 
---
+---
 
 ## 🧪 Future Improvements
 - Notifications for expenses or reimbursements
@@ -92,9 +92,8 @@ create table expenses (
 - Role-based permissions (Admins, Members)
 - Export to CSV/PDF
 
---
+---
 
 ## 🤝 Contributing
 - Feel free to fork, suggest features, or report bugs via GitHub Issues.
 
---
