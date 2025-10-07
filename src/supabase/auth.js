@@ -50,25 +50,20 @@ export class AuthService {
       await supabase.auth.signOut();
       return true;
     } catch (error) {
-      // console.error("Supabase service :: logout :: error", error);
+      console.error("Supabase service :: logout :: error", error);
     }
   }
 
   async signInWithGoogle() {
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: String(import.meta.env.VITE_REDIRECT_URL),
-        },
-      });
-      if (error) throw error;
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: String(import.meta.env.VITE_REDIRECT_URL),
+      },
+    });
+    if (error) throw error;
 
-      return data;
-    } catch (error) {
-      // console.error("Supabase service :: signInWithGoogle :: error", error);
-      throw error;
-    }
+    return data;
   }
 }
 
