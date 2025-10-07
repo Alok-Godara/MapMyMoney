@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import authService from "../supabase/auth";
-import { supabase } from "../supabase/supabaseClient";
+// import { supabase } from "../supabase/supabaseClient";
 import { login } from "../store/authSlice";
 import { Link, useNavigate } from "react-router-dom";
-import { Building2 } from "lucide-react";
+// import { Building2 } from "lucide-react";
 import Logo from "../components/Logo";
 
 const Login = () => {
@@ -21,7 +21,7 @@ const Login = () => {
       setLoading(true);
       setError("");
 
-      const { data, error } = await authService.signInWithGoogle();
+      const { error } = await authService.signInWithGoogle();
 
       if (error) {
         setError(error.message);
@@ -43,6 +43,8 @@ const Login = () => {
       
     } catch (error) {
       setLoading(false);
+      console.error("Google sign-in error:", error);
+      setError("An unexpected error occurred. Please try again.")
     }
   };
 
