@@ -76,7 +76,7 @@ const Login = () => {
             <Logo className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
           </div>
           <h2 className="mt-4 sm:mt-6 text-center text-2xl sm:text-3xl font-extrabold text-white">
-            Sign in to MapMyMoney
+            Sign in to Finsync
           </h2>
           <p className="mt-2 text-center text-xs sm:text-sm text-gray-400">
             Or{" "}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import authService from "../supabase/auth";
 import { LogOut, User } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
@@ -6,7 +6,7 @@ import { logout } from "../store/authSlice";
 import { useNavigate } from "react-router-dom";
 import Logo from "./Logo";
 
-const AuthLayout = ({ children, title = "MapMyMoney" }) => {
+const AuthLayout = ({ children, title = "Finsync" }) => {
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -16,7 +16,9 @@ const AuthLayout = ({ children, title = "MapMyMoney" }) => {
       await authService.logoutService();
       dispatch(logout());
       navigate("/login");
-    } catch (error) {
+    } catch (err) {
+  // Log sign-out errors for debugging
+  console.error("Sign out error:", err);
     }
   };
 
@@ -27,7 +29,7 @@ const AuthLayout = ({ children, title = "MapMyMoney" }) => {
           <div className="flex justify-between items-center py-4 sm:py-6">
             <div className="flex items-center">
               <Logo className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
-              <h1 className="ml-2 text-xl sm:text-2xl lg:text-3xl font-bold text-white">MapMyMoney</h1>
+              <h1 className="ml-2 text-xl sm:text-2xl lg:text-3xl font-bold text-white">{title}</h1>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
               <div className="hidden sm:flex items-center space-x-2 text-gray-300">
