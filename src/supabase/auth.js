@@ -58,7 +58,7 @@ export class AuthService {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: String(import.meta.env.VITE_REDIRECT_URL),
+        redirectTo: String("https://finsync-iitj.netlify.app/auth/callback"),
       },
     });
     if (error) throw error;
